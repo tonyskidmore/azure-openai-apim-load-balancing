@@ -399,3 +399,38 @@ FodyWeavers.xsd
 
 # Local
 *Outputs.json
+
+# Terraform
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+*.tfstate.lock.info
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude all .tfvars files, which are likely to contain sensitive data
+*.tfvars
+*.tfvars.json
+
+# Ignore override files as they are usually used for local development
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# Terraform plan output
+tfplan
+*.tfplan
+
+# Ignore .terraform.lock.hcl file
+.terraform.lock.hcl
