@@ -180,7 +180,7 @@ resource "azurerm_api_management_api_policy" "load_balancing" {
   api_management_name = azurerm_api_management.main.name
   resource_group_name = azurerm_resource_group.main.name
 
-  xml_content = file("${path.module}/policies/round-robin-policy.xml")
+  xml_content = file("${path.module}/policies/${var.apim_policy_file}")
 }
 
 resource "azurerm_role_assignment" "openai_cognitive_services" {

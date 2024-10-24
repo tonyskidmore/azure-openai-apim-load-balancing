@@ -1,0 +1,86 @@
+<policies>
+    <inbound>
+        <base />
+        <set-variable name="request-start-time" value="@(DateTime.UtcNow)" />
+        <cache-lookup-value key="backend-counter" variable-name="backend-counter" />
+        <choose>
+            <when condition="@(!context.Variables.ContainsKey("backend-counter"))">
+                <set-variable name="backend-counter" value="0" />
+                <cache-store-value key="backend-counter" value="0" duration="100" />
+            </when>
+        </choose>
+        <choose>
+            <when condition="@(Convert.ToInt32(context.Variables["backend-counter"]) == 0)">
+                <set-backend-service backend-id="OpenAIUKS" />
+                <set-variable name="backend-counter" value="1" />
+                <cache-store-value key="backend-counter" value="1" duration="100" />
+                <set-variable name="selected-region" value="UK South" />
+            </when>
+            <otherwise>
+                <set-backend-service backend-id="OpenAIWUS" />
+                <set-variable name="backend-counter" value="0" />
+                <cache-store-value key="backend-counter" value="0" duration="100" />
+                <set-variable name="selected-region" value="West US" />
+            </otherwise>
+        </choose>
+        <authentication-managed-identity resource="https://cognitiveservices.azure.com" client-id="{{MANAGED-IDENTITY-CLIENT-ID}}" output-token-variable-name="msi-access-token" ignore-error="false" />
+        <set-header name="Authorization" exists-action="override">
+            <value>@("Bearer " + (string)context.Variables["msi-access-token"])</value>
+        </set-header>
+        <rewrite-uri template="@{return context.Request.OriginalUrl.Path;}" />
+    </inbound>
+    <backend>
+        <retry condition="@(context.Response.StatusCode >= 400)" count="3" interval="5" first-fast-retry="true">
+            <cache-lookup-value key="backend-counter" variable-name="backend-counter" />
+            <choose>
+                <when condition="@(Convert.ToInt32(context.Variables["backend-counter"]) == 0)">
+                    <set-backend-service backend-id="OpenAIUKS" />
+                    <set-variable name="backend-counter" value="1" />
+                    <cache-store-value key="backend-counter" value="1" duration="100" />
+                    <set-variable name="selected-region" value="UK South" />
+                </when>
+                <otherwise>
+                    <set-backend-service backend-id="OpenAIWUS" />
+                    <set-variable name="backend-counter" value="0" />
+                    <cache-store-value key="backend-counter" value="0" duration="100" />
+                    <set-variable name="selected-region" value="West US" />
+                </otherwise>
+            </choose>
+            <forward-request buffer-request-body="true" />
+        </retry>
+    </backend>
+    <outbound>
+        <base />
+        <set-header name="x-test" exists-action="override">
+            <value>test-value</value>
+        </set-header>
+        <set-header name="x-retry-count" exists-action="override">
+            <value>@(context.Variables.GetValueOrDefault<int>("retry-count", 0).ToString())</value>
+        </set-header>
+        <set-header name="x-backend-service" exists-action="override">
+            <value>@(context.Variables["selected-region"] == "UK South" ? "OpenAIUKS" : "OpenAIWUS")</value>
+        </set-header>
+        <set-header name="x-correlation-id" exists-action="override">
+            <value>@(context.Request.Headers.GetValueOrDefault("x-correlation-id", "unknown"))</value>
+        </set-header>
+        <set-header name="x-request-time" exists-action="override">
+            <value>@(DateTime.UtcNow.ToString("o"))</value>
+        </set-header>
+        <set-header name="x-request-duration" exists-action="override">
+            <value>@{
+                var startTime = context.Variables.GetValueOrDefault<DateTime>("request-start-time", DateTime.UtcNow);
+                var duration = DateTime.UtcNow - startTime;
+                return duration.TotalMilliseconds.ToString();
+            }</value>
+        </set-header>
+        <set-header name="x-cache-status" exists-action="override">
+            <value>@{
+                var cacheKey = context.Variables.GetValueOrDefault<string>("backend-counter", "");
+                return string.IsNullOrEmpty(cacheKey) ? "no-cache" : "cache-hit";
+            }</value>
+        </set-header>
+    </outbound>
+    <on-error>
+        <base />
+    </on-error>
+</policies>

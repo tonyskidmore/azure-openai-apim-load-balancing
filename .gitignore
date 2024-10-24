@@ -434,3 +434,94 @@ tfplan
 
 # Ignore .terraform.lock.hcl file
 .terraform.lock.hcl
+
+
+# Python virtual environment directories
+venv/
+env/
+ENV/
+.venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Pytest
+.cache/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Python specific test results
+.coverage
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# PyInstaller
+# Usually these files are written by a Python script from PyInstaller
+*.manifest
+*.spec
+
+# Distribution / Packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Pip environment files
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# Pyenv
+.python-version
+
+# dotenv
+.env
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyright type checking
+.pyright/
+
+# Bandit security linter
+.bandit/
+
+# Pylint
+pylint-report.txt
+pylint-out.txt

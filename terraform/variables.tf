@@ -1,3 +1,9 @@
+variable "apim_policy_file" {
+  description = "APIM polixy file name."
+  type        = string
+  default     = "round-robin-policy.xml"
+}
+
 variable "workload_name" {
   description = "Name of the workload which is used to generate a short unique hash used in all resources."
   type        = string
